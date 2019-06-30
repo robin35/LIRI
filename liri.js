@@ -5,8 +5,6 @@ var axios = require("axios");
 var moment = require("moment");
 var Spotify = require('node-spotify-api');
 var fs = require("fs");
-var inquirer = require("inquirer");
-
 
 //console.log( "keys: " + keys );
 
@@ -24,7 +22,6 @@ callBands = function() {
   axios.get("https://rest.bandsintown.com/artists/"+searchTerm+"/events?app_id=" + id ).then(
     function(response) {
 
-      console.log("Response: ", response);
       var results = response.data;
 
       for (var i = 0; i < results.length; i++) {
@@ -34,6 +31,8 @@ callBands = function() {
         console.log("Name of the venue: ", results[i].venue.name);
         console.log("Venue location: ", results[i].venue.city);
         console.log("Date of the Event: ", moment(results[i].venue.datetime).format("L"));
+
+        writeFile(results);
       }
     })
 
@@ -74,6 +73,8 @@ callSpotify = function() {
     console.log("Song Name: ", results[0].name);
     console.log("Preview Link: ", results[0].preview_url);
     console.log("Album Name: ", results[0].album.name);
+
+    writeFile(results);
   })
 }
 
@@ -105,6 +106,8 @@ callOMDB = function() {
       console.log("Language: ", results.Language);
       console.log("Plot: ", results.Plot);
       console.log("Actors: ", results.Actors);
+
+      writeFile(results);
     })
 
     .catch(function(err) {
@@ -115,7 +118,7 @@ callOMDB = function() {
 
 
 //==============================================================================================================================
-// DO WHAT IT SAYS
+// Do What it Says
 //==============================================================================================================================
 
 callRandom = function() {
@@ -128,11 +131,7 @@ callRandom = function() {
     var dataArr = data.split(",");
 
     liriCommand = dataArr[0];
-    searchTerm2 = dataArr[1];
-
-    searchTerm = searchTerm2;
-
-    console.log("searchTerm", searchTerm);
+    searchTerm = dataArr[1];
 
     if( liriCommand === "concert-this"){
       callBands();
@@ -147,6 +146,23 @@ callRandom = function() {
     }
 
   });
+}
+
+
+//==============================================================================================================================
+// Write Query to Text File
+//==============================================================================================================================
+
+
+writeFile = function(results) {
+  fs.appendFileSync("log.txt", JSON.stringify(results)+'\r\n', function(err) {
+      if(err){
+          return console.log(err); 
+          
+      };
+      console.log("log.txt was updated!");
+  });
+
 }
 
 
